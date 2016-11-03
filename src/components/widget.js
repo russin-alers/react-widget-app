@@ -6,7 +6,6 @@ const Widget = ({name, count,color, onClick, key}) => {
   var widgetStyle = {
     backgroundColor: `rgb(${colors[0]},${colors[1]},${colors[2]})`
   };
-  // console.log(widgetStyle);
 
   return (
     <div className='panel panel-default' key={key} style={widgetStyle} onClick={onClick}>

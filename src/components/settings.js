@@ -1,61 +1,52 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
+import { changeName, changeCount, changeColor, setActiveWidget } from '../actions/actions';
 
-class Settings extends React.Component {
+export default class Settings extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      name:'',
-      count:null,
-      color:null,
-    };
-  }
 
-  componentWillReceiveProps(newProps) {
-    if (newProps.activeWidget){
-      this.setState({
-        name:newProps.activeWidget.name,
-        count:newProps.activeWidget.count,
-        color:newProps.activeWidget.color,
-      });
-      this.refs.name.value = newProps.activeWidget.name;
-      this.refs.count.value = newProps.activeWidget.count;
-      this.refs.color.value = newProps.activeWidget.color;
-    };
-  };
-
-  handleChange(e) {
-    e.preventDefault();
-    var stateChange = {};
-    stateChange[e.target.name] = e.target.value;
-    this.setState(stateChange);
+  componentWillUpdate(newProps) {
+    if (newProps.store.activeWidget){
+      var name = newProps.store.activeWidget.name;
+      var count = newProps.store.activeWidget.count;
+      var color = newProps.store.activeWidget.color;
+      var activeWidget = newProps.store.activeWidget;
+      this._fill(name,count,color, activeWidget);
+    }
   };
 
   onAdd(e){
     e.preventDefault();
-    var name = this.state.name;
-    var count = parseInt(this.state.count);
-    var color = this.state.color;
+    var name = this.refs.name.value;
+    var count = parseInt(this.refs.count.value);
+    var color = this.refs.color.value;
     if (name && count && color && this._validate(color)) {
+      this.props.store.dispatch(changeName(this.refs.name.value));
+      this.props.store.dispatch(changeCount(count));
+      this.props.store.dispatch(changeColor(color));
       var newWidget = {
         name: name,
         count: count,
         color: color
       }
       if (this.props.addWidget(e, newWidget)) {
-        this._empty();
+        this._fill();
       };
     }
   };
 
   onSave(e) {
     e.preventDefault();
-    if (this._validate(this.state.color)){
-      const oldWidget = this.props.activeWidget;
-      const newWidget = {...this.state}
+    if (this._validate(this.refs.color.value)){
+      const oldWidget = this.props.store.activeWidget;
+      const newWidget = {
+        name: this.refs.name.value,
+        count: this.refs.count.value,
+        color: this.refs.color.value
+      }
       if (this.props.saveWidget(oldWidget, newWidget)){
-        this._empty();
+        this._fill();
       };
     };
   };
@@ -71,16 +62,19 @@ class Settings extends React.Component {
     };
   };
 
-  _empty() {
-    this.refs.name.value = '';
-    this.refs.count.value = null;
-    this.refs.color.value = null;
-    this.setState({...this.state, name:'', count:null, color:null });
+  _fill(name='',count=null,color=null, activeWidget=null) {
+    this.refs.name.value = name;
+    this.refs.count.value = count;
+    this.refs.color.value = color;
+    this.props.store.dispatch(changeName(name));
+    this.props.store.dispatch(changeCount(count));
+    this.props.store.dispatch(changeColor(color));
+    this.props.store.dispatch(setActiveWidget(activeWidget));
   }
 
   render() {
     var saveButton = 'btn btn-primary '
-    var saveButtonClass = this.props.activeWidget ? saveButton+'btn-block' : saveButton+'disabled btn-block'
+    var saveButtonClass = this.props.store.activeWidget ? saveButton+'btn-block' : saveButton+'btn-block disabled';
     return (
       <div>
           <div className='form-group'>
@@ -90,7 +84,6 @@ class Settings extends React.Component {
               name= 'name'
               type= 'text'
               ref = 'name'
-              onChange={this.handleChange.bind(this)}
             />
           </div>
           <div className='form-group'>
@@ -100,7 +93,6 @@ class Settings extends React.Component {
               name= 'count'
               type= 'number'
               ref= 'count'
-              onChange={this.handleChange.bind(this)}
             />
           </div>
           <div className='form-group'>
@@ -110,15 +102,12 @@ class Settings extends React.Component {
               name='color'
               ref = 'color'
               placeholder='r,g,b'
-              onChange={this.handleChange.bind(this)}
             />
           </div>
           <button className='btn btn-primary btn-block' onClick={this.onAdd.bind(this)}>Add</button>
-          <button disabled={!this.props.activeWidget} className={saveButtonClass} onClick={this.onSave.bind(this)}>Save</button>
+          <button disabled={!this.props.store.activeWidget} className={saveButtonClass} onClick={this.onSave.bind(this)}>Save</button>
       </div>
     );
   }
 
-}
-
-export default Settings;
+};
