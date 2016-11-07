@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Widget = ({name, count,color, onClick, key}) => {
+const Widget = ({name, count,color, onClick, key, index}) => {
 
   var colors = color.split(',');
   var widgetStyle = {
@@ -21,6 +21,7 @@ const Widget = ({name, count,color, onClick, key}) => {
 
 
 Widget.propTypes = {
+  index: React.PropTypes.number.isRequired,
   name: React.PropTypes.string.isRequired,
   count: React.PropTypes.number.isRequired,
   color: React.PropTypes.string.isRequired

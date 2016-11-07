@@ -5,14 +5,16 @@ export default class Dashboard extends React.Component {
 
   render() {
 
-    var widgets = this.props.widgets.map((widget, index) => {
+    var widgets = this.props.widgets.map((widget) => {
+      var { name, count, color, index } = widget
       return (
         <Widget
-          key={index+1}
-          name={widget.name}
-          count={widget.count}
-          color={widget.color}
-          onClick= {this.props.handleClick.bind(this, widget)}
+          key={index}
+          index={index}
+          name={name}
+          count={count}
+          color={color}
+          onClick= {this.props.handleClick.bind(this, index)}
         />
       )
     });

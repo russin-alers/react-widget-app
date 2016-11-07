@@ -1,17 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
-import { changeName, changeCount, changeColor, setActiveWidget } from '../actions/actions';
+// import { changeName, changeCount, changeColor, setActiveWidget } from '../actions/actions';
 
 export default class Settings extends React.Component {
 
 
   componentWillUpdate(newProps) {
-    if (newProps.store.activeWidget){
-      var name = newProps.store.activeWidget.name;
-      var count = newProps.store.activeWidget.count;
-      var color = newProps.store.activeWidget.color;
-      var activeWidget = newProps.store.activeWidget;
+    if (newProps.activeWidget){
+      var name = newProps.activeWidget.name;
+      var count = newProps.activeWidget.count;
+      var color = newProps.activeWidget.color;
+      var activeWidget = newProps.activeWidget;
       this._fill(name,count,color, activeWidget);
     }
   };
@@ -22,13 +22,14 @@ export default class Settings extends React.Component {
     var count = parseInt(this.refs.count.value);
     var color = this.refs.color.value;
     if (name && count && color && this._validate(color)) {
-      this.props.store.dispatch(changeName(this.refs.name.value));
-      this.props.store.dispatch(changeCount(count));
-      this.props.store.dispatch(changeColor(color));
+      this.props.changeName(this.refs.name.value);
+      this.props.changeCount(count);
+      this.props.changeColor(color);
       var newWidget = {
         name: name,
         count: count,
-        color: color
+        color: color,
+        index: this.props.widgets.length
       }
       if (this.props.addWidget(e, newWidget)) {
         this._fill();
@@ -39,7 +40,7 @@ export default class Settings extends React.Component {
   onSave(e) {
     e.preventDefault();
     if (this._validate(this.refs.color.value)){
-      const oldWidget = this.props.store.activeWidget;
+      const oldWidget = this.props.activeWidget;
       const newWidget = {
         name: this.refs.name.value,
         count: this.refs.count.value,
@@ -66,15 +67,15 @@ export default class Settings extends React.Component {
     this.refs.name.value = name;
     this.refs.count.value = count;
     this.refs.color.value = color;
-    this.props.store.dispatch(changeName(name));
-    this.props.store.dispatch(changeCount(count));
-    this.props.store.dispatch(changeColor(color));
-    this.props.store.dispatch(setActiveWidget(activeWidget));
+    this.props.changeName(name);
+    this.props.changeCount(count);
+    this.props.changeColor(color);
+    this.props.setActiveWidget(activeWidget);
   }
 
   render() {
     var saveButton = 'btn btn-primary '
-    var saveButtonClass = this.props.store.activeWidget ? saveButton+'btn-block' : saveButton+'btn-block disabled';
+    var saveButtonClass = this.props.activeWidget ? saveButton+'btn-block' : saveButton+'btn-block disabled';
     return (
       <div>
           <div className='form-group'>
@@ -105,7 +106,7 @@ export default class Settings extends React.Component {
             />
           </div>
           <button className='btn btn-primary btn-block' onClick={this.onAdd.bind(this)}>Add</button>
-          <button disabled={!this.props.store.activeWidget} className={saveButtonClass} onClick={this.onSave.bind(this)}>Save</button>
+          <button disabled={!this.props.activeWidget} className={saveButtonClass} onClick={this.onSave.bind(this)}>Save</button>
       </div>
     );
   }

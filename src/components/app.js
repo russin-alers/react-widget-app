@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import Dashboard from './dashboard';
 import Settings from './settings';
+
 import _ from 'underscore';
+
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { changeName, changeCount, changeColor, addWidget, setActiveWidget, saveWidget} from '../actions/actions';
+import * as actions from '../actions/actions';
 
 class App extends Component {
 
@@ -12,23 +15,24 @@ class App extends Component {
     var widgets = this.props.widgets;
     if (widget) {
       widgets.push(widget);
-      this.props.dispatch(addWidget(widgets));
+      this.props.addWidget(widgets);
       return true;
     };
   };
 
   _saveWidget (oldWidget, newWidget) {
-    var foundWidget = _.find(this.props.widgets, widget => widget.name === oldWidget.name);
+    var foundWidget = _.find(this.props.widgets, widget => widget.index === oldWidget.index);
+    console.log(foundWidget);
     foundWidget.name = newWidget.name;
     foundWidget.count = parseInt(newWidget.count);
     foundWidget.color = newWidget.color;
-    this.props.dispatch(saveWidget(this.props.widgets));
-    this.props.dispatch(setActiveWidget(null))
+    this.props.saveWidget(this.props.widgets);
+    this.props.setActiveWidget(null);
     return true;
   }
 
-  handleClick(widget,e) {
-    this.props.dispatch(setActiveWidget(widget));
+  handleClick(i,e) {
+    this.props.setActiveWidget(this.props.widgets[i]);
     return true
   };
 
@@ -43,7 +47,7 @@ class App extends Component {
         </div>
         <div className='col-md-2 col-md-offset-2'>
           <Settings
-          store={this.props}
+          {...this.props}
           saveWidget={this._saveWidget.bind(this)}
           addWidget={this.addWidget.bind(this)}
           />
@@ -57,4 +61,8 @@ function mapStateToProps(state) {
   return state;
 }
 
-export default connect(mapStateToProps)(App);
+export function mapDispatchToProps(dispatch) {
+  return bindActionCreators(actions, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
